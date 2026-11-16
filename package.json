@@ -50,5 +50,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression": "^7.25.9"
   }
 }

@@ -1,45 +1,62 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '@popperjs/core/dist/cjs/popper.js';
+import 'bootstrap/dist/js/bootstrap.min.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import {
     createBrowserRouter,
     RouterProvider
-} from "react-router-dom";
+} from 'react-router-dom';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css'
+import Home from './componentes/telas/Home';
+import Sobre from './componentes/telas/Sobre';
 
-import Menu from "./components/Menu";
-import Cultura from "./components/view/culturas/Cultura";
-import Planta from "./components/view/plantas/Planta";
-import Manejo from "./components/view/manejos/Manejo";
-import Sobre from "./components/view/Sobre"
+import Categoria from './componentes/telas/categoria/Categoria';
+import Produto from './componentes/telas/produto/Produto';
+import Login from './componentes/telas/login/Login';
+
+import MenuPublico from './componentes/MenuPublico';
+import MenuPrivado from './componentes/MenuPrivado';
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Menu />,
-
+        element: <MenuPublico />,
         children: [
-
-
             {
-                path: "plantas",
-                element: <Planta/>
+                index: true,
+                element: <Home />
             },
-
             {
-                path: "culturas",
-                element: <Cultura/>
+                path: "/sobre",
+                element: <Sobre />
             },
-
             {
-                path: "manejos",
-                element: <Manejo/>
+                path: "login",
+                element: <Login />
+            }
+        ]
+    },
+    {
+        path: "/privado",
+        element: <MenuPrivado />,
+        children: [
+            {
+                index: true,
+                element: <Home />
             },
-
             {
                 path: "sobre",
-                element: <Sobre/>
+                element: <Sobre />
+            },
+            {
+                path: "categorias",
+                element: <Categoria />
+            },
+            {
+                path: "produtos",
+                element: <Produto />
             }
-
         ]
     }
 ]);
