@@ -1,42 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-
-import {
-    gravaAutenticacao,
-    getToken
-} from '../../../seguranca/Autenticacao';
-
-import Carregando from '../../comuns/Carregando';
-import Alerta from '../../comuns/Alerta';
-import CampoEntrada from '../../comuns/CampoEntrada';
+import { Navigate, NavLink } from 'react-router-dom';
+import { gravaAutenticacao, getToken } from '../../../security/Autenticacao';
+import Carregando from '../../common/Carregando';
+import Alerta from '../../common/Alerta';
+import CampoEntrada from '../../common/CampoEntrada';
 
 function Login() {
-
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
-
-    const [alerta, setAlerta] = useState({
-        status: "",
-        message: ""
-    });
-
+    const [alerta, setAlerta] = useState({ status: "", message: "" });
     const [autenticado, setAutenticado] = useState(false);
     const [carregando, setCarregando] = useState(false);
 
-    const acaoLogin = async e => {
-
+    const acaoLogin = async (e) => {
         e.preventDefault();
 
         try {
             const body = {
-                email: email,
-                senha: senha
+                e_mail: email,
+                passw: senha
             };
 
             setCarregando(true);
 
-            await fetch(
-                `${process.env.REACT_APP_ENDERECO_API}/login`,
+            const response = await fetch(
+                `${process.env.REACT_APP_ENDERECO_API || "http://localhost:3003"}/login`,
                 {
                     method: "POST",
                     headers: {
@@ -44,25 +32,20 @@ function Login() {
                     },
                     body: JSON.stringify(body)
                 }
-            )
-                .then(response => response.json())
-                .then(json => {
-                    if (json.auth === false) {
-                        setAlerta({
-                            status: "error",
-                            message: json.message
-                        });
-                    }
+            );
 
-                    if (json.auth === true) {
-                        setAutenticado(true);
-                        gravaAutenticacao(json);
-                    }
+            const json = await response.json();
+
+            if (json.auth === false) {
+                setAlerta({
+                    status: "error",
+                    message: json.message
                 });
-
+            } else if (json.auth === true) {
+                setAutenticado(true);
+                gravaAutenticacao(json);
+            }
         } catch (err) {
-            console.error(err.message);
-
             setAlerta({
                 status: "error",
                 message: err.message
@@ -75,7 +58,6 @@ function Login() {
     useEffect(() => {
         try {
             const token = getToken();
-
             if (token != null) {
                 setAutenticado(true);
             }
@@ -92,7 +74,7 @@ function Login() {
     }
 
     return (
-        <div className="container">
+        <div className="container mt-4">
             <div className="row justify-content-center">
                 <div className="col-12 col-md-6">
                     <Carregando carregando={carregando}>
@@ -107,14 +89,14 @@ function Login() {
                                 value={email}
                                 id="txtEmail"
                                 name="email"
-                                label="Nome"
+                                label="E-mail"
                                 tipo="email"
                                 onchange={e => setEmail(e.target.value)}
                                 msgvalido="Email OK"
                                 msginvalido="Informe o email"
                                 requerido={true}
                                 readonly={false}
-                                maxCaracteres={40}
+                                maxCaracteres={50}
                             />
 
                             <CampoEntrada
@@ -128,7 +110,7 @@ function Login() {
                                 msginvalido="Informe a senha"
                                 requerido={true}
                                 readonly={false}
-                                maxCaracteres={40}
+                                maxCaracteres={20}
                             />
 
                             <button
@@ -137,6 +119,11 @@ function Login() {
                             >
                                 Efetuar login
                             </button>
+
+                            <div className="mt-3 text-center">
+                                <span>Não tem uma conta? </span>
+                                <NavLink to="/registro">Cadastre-se aqui</NavLink>
+                            </div>
                         </form>
                     </Carregando>
                 </div>

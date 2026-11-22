@@ -4,10 +4,13 @@ import Alerta from "../../common/Alerta";
 import Carregando from "../../common/Carregando";
 import Table from "react-bootstrap/Table";
 import { Button } from "react-bootstrap";
+import { getUsuario } from "../../../security/Autenticacao";
 
 function Tabela() {
   const { alerta, listaObjetos, remover, novoObjeto, editarObjeto, carregando } =
     useContext(PlantaContext);
+
+  const usuario = getUsuario();
 
   return (
     <div style={{ padding: "20px" }}>
@@ -46,12 +49,16 @@ function Tabela() {
                       >
                         <i className="bi bi-pencil-square"></i>
                       </Button>
-                      <Button
-                        variant="danger"
-                        onClick={() => remover(id)}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </Button>
+
+                      {/* Botão de remoção visível apenas para administradores */}
+                      {usuario && usuario.modo === 'A' && (
+                        <Button
+                          variant="danger"
+                          onClick={() => remover(id)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </Button>
+                      )}
                     </td>
                     <td>{id}</td>
                     <td>{objeto.nome_planta}</td>

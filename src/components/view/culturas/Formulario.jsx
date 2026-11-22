@@ -3,7 +3,7 @@ import Alerta from "../../common/Alerta";
 import CulturaContext from "./CulturaContext";
 import Col from "react-bootstrap/Col";
 import CampoEntrada from "../../common/CampoEntrada";
-import CampoSelect from "../../common/CampoSelect"; // Importado
+import CampoSelect from "../../common/CampoSelect";
 import Dialogo from "../../common/Dialogo";
 
 function Formulario() {
@@ -28,7 +28,6 @@ function Formulario() {
     >
       <Alerta alerta={alerta} />
 
-     
       <Col xs={12} md={12}>
         <CampoEntrada
           value={objeto.id_cultura || ""}
@@ -41,13 +40,12 @@ function Formulario() {
         />
       </Col>
 
-      
       <Col xs={12} md={12}>
         <CampoSelect
           id="txtPlantaId"
           name="planta_id"
           label="Planta"
-          value={objeto.planta_id || ""}
+          value={objeto.planta_id ? String(objeto.planta_id) : ""}
           onchange={handleChange}
           requerido={true}
           msginvalido="Selecione uma planta"
@@ -55,7 +53,7 @@ function Formulario() {
           {listaPlantas?.map((planta) => {
             const plantaId = planta.id_planta || planta.codigo;
             return (
-              <option key={plantaId} value={plantaId}>
+              <option key={plantaId} value={String(plantaId)}>
                 {planta.nome_planta}
               </option>
             );
@@ -63,7 +61,6 @@ function Formulario() {
         </CampoSelect>
       </Col>
 
-      
       <Col xs={12} md={12}>
         <CampoEntrada
           value={objeto.hectares || ""}

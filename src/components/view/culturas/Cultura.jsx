@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CulturaContext from "./CulturaContext";
+import WithAuth from "../../../security/WithAuth";
 import {
   getCulturasAPI,
   getCulturaPorCodigoAPI,
@@ -16,32 +18,61 @@ import Formulario from "./Formulario";
 import Carregando from "../../common/Carregando";
 
 function Cultura() {
+  const navigate = useNavigate();
   const [alerta, setAlerta] = useState({ status: "", message: "" });
   const [listaObjetos, setListaObjetos] = useState([]);
   const [listaPlantas, setListaPlantas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   const recuperaCulturas = async () => {
-    setCarregando(true);
-    setListaObjetos(await getCulturasAPI());
-    setCarregando(false);
+    try {
+      setCarregando(true);
+      const dados = await getCulturasAPI();
+      if (dados.auth === false) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      setListaObjetos(Array.isArray(dados) ? dados : []);
+    } catch (err) {
+      navigate("/login", { replace: true });
+    } finally {
+      setCarregando(false);
+    }
   };
 
   const recuperaPlantas = async () => {
-    setListaPlantas(await getPlantasAPI());
+    try {
+      const dados = await getPlantasAPI();
+      if (dados.auth === false) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      setListaPlantas(Array.isArray(dados) ? dados : []);
+    } catch (err) {
+      navigate("/login", { replace: true });
+    }
   };
 
   const remover = async (codigo) => {
     if (window.confirm("Deseja remover este objeto?")) {
-      let retornoAPI = await deleteCulturaPorCodigoAPI(codigo);
-      setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
-      recuperaCulturas();
+      try {
+        let retornoAPI = await deleteCulturaPorCodigoAPI(codigo);
+        if (retornoAPI.auth === false) {
+          setAlerta({ status: "error", message: retornoAPI.message });
+          return;
+        }
+        setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
+        recuperaCulturas();
+      } catch (err) {
+        navigate("/login", { replace: true });
+      }
     }
   };
 
   useEffect(() => {
     recuperaCulturas();
     recuperaPlantas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [editar, setEditar] = useState(false);
@@ -171,9 +202,20 @@ function Cultura() {
     const name = e.target.name;
     const value = e.target.value;
 
+    let extra = {};
+    if (name === "planta_id") {
+      const plantaEncontrada = listaPlantas.find(
+        (p) => String(p.id_planta || p.codigo) === String(value)
+      );
+      if (plantaEncontrada) {
+        extra.planta_nome = plantaEncontrada.nome_planta;
+      }
+    }
+
     setObjeto({
       ...objeto,
       [name]: value,
+      ...extra,
     });
   };
 
@@ -203,4 +245,4 @@ function Cultura() {
   );
 }
 
-export default Cultura;
+export default WithAuth(Cultura);

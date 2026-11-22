@@ -51,17 +51,18 @@ function Formulario() {
           id="txtCulturaId"
           name="cultura_id"
           label="Cultura"
-          value={objeto.cultura_id || ""}
+          value={objeto.cultura_id ? String(objeto.cultura_id) : ""}
           onchange={handleChange}
           requerido={true}
           msginvalido="Selecione uma cultura"
         >
           {listaCulturas?.map((cultura) => {
             const culturaId = cultura.id_cultura || cultura.codigo;
+            const nomePlanta = cultura.planta_nome || `Planta #${cultura.planta_id}`;
+            const hectares = cultura.hectares ? ` - ${cultura.hectares} hectares` : "";
             return (
-              <option key={culturaId} value={culturaId}>
-                {/* Exibe o ID da cultura e o ID da planta associada */}
-                {`Cultura #${culturaId} (Planta ID: ${cultura.planta_id})`}
+              <option key={culturaId} value={String(culturaId)}>
+                {`Cultura de ${nomePlanta}${hectares}`}
               </option>
             );
           })}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ManejoContext from "./ManejoContext";
+import WithAuth from "../../../security/WithAuth";
 import {
   getManejosAPI,
   getManejoPorCodigoAPI,
@@ -17,32 +19,61 @@ import Formulario from "./Formulario";
 import Carregando from "../../common/Carregando";
 
 function Manejo() {
+  const navigate = useNavigate();
   const [alerta, setAlerta] = useState({ status: "", message: "" });
   const [listaObjetos, setListaObjetos] = useState([]);
   const [listaCulturas, setListaCulturas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   const recuperaManejos = async () => {
-    setCarregando(true);
-    setListaObjetos(await getManejosAPI());
-    setCarregando(false);
+    try {
+      setCarregando(true);
+      const dados = await getManejosAPI();
+      if (dados.auth === false) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      setListaObjetos(Array.isArray(dados) ? dados : []);
+    } catch (err) {
+      navigate("/login", { replace: true });
+    } finally {
+      setCarregando(false);
+    }
   };
 
   const recuperaCulturas = async () => {
-    setListaCulturas(await getCulturasAPI());
+    try {
+      const dados = await getCulturasAPI();
+      if (dados.auth === false) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      setListaCulturas(Array.isArray(dados) ? dados : []);
+    } catch (err) {
+      navigate("/login", { replace: true });
+    }
   };
 
   const remover = async (codigo) => {
     if (window.confirm("Deseja remover este objeto?")) {
-      let retornoAPI = await deleteManejoPorCodigoAPI(codigo);
-      setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
-      recuperaManejos();
+      try {
+        let retornoAPI = await deleteManejoPorCodigoAPI(codigo);
+        if (retornoAPI.auth === false) {
+          setAlerta({ status: "error", message: retornoAPI.message });
+          return;
+        }
+        setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
+        recuperaManejos();
+      } catch (err) {
+        navigate("/login", { replace: true });
+      }
     }
   };
 
   useEffect(() => {
     recuperaManejos();
     recuperaCulturas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [editar, setEditar] = useState(false);
@@ -181,4 +212,4 @@ function Manejo() {
   );
 }
 
-export default Manejo;
+export default WithAuth(Manejo);

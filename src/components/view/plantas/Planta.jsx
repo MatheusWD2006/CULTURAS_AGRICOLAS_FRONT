@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import PlantaContext from "./PlantaContext";
+import WithAuth from "../../../security/WithAuth";
 import {
   getPlantasAPI,
   getPlantaPorCodigoAPI,
@@ -11,26 +13,46 @@ import Formulario from "./Formulario";
 import Carregando from "../../common/Carregando";
 
 function Planta() {
+  const navigate = useNavigate();
   const [alerta, setAlerta] = useState({ status: "", message: "" });
   const [listaObjetos, setListaObjetos] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   const recuperaPlantas = async () => {
-    setCarregando(true);
-    setListaObjetos(await getPlantasAPI());
-    setCarregando(false);
+    try {
+      setCarregando(true);
+      const dados = await getPlantasAPI();
+      if (dados.auth === false) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      setListaObjetos(Array.isArray(dados) ? dados : []);
+    } catch (err) {
+      navigate("/login", { replace: true });
+    } finally {
+      setCarregando(false);
+    }
   };
 
   const remover = async (codigo) => {
     if (window.confirm("Deseja remover este objeto?")) {
-      let retornoAPI = await deletePlantaPorCodigoAPI(codigo);
-      setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
-      recuperaPlantas();
+      try {
+        let retornoAPI = await deletePlantaPorCodigoAPI(codigo);
+        if (retornoAPI.auth === false) {
+          setAlerta({ status: "error", message: retornoAPI.message });
+          return;
+        }
+        setAlerta({ status: retornoAPI.status, message: retornoAPI.message });
+        recuperaPlantas();
+      } catch (err) {
+        navigate("/login", { replace: true });
+      }
     }
   };
 
   useEffect(() => {
     recuperaPlantas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [editar, setEditar] = useState(false);
@@ -121,4 +143,4 @@ function Planta() {
   );
 }
 
-export default Planta;
+export default WithAuth(Planta);

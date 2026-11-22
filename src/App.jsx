@@ -8,15 +8,17 @@ import {
     RouterProvider
 } from 'react-router-dom';
 
-import Home from './componentes/telas/Home';
-import Sobre from './componentes/telas/Sobre';
+import Home from './components/view/Home';
+import Sobre from './components/view/Sobre';
+import Cultura from './components/view/culturas/Cultura';
+import Planta from './components/view/plantas/Planta';
+import Manejo from './components/view/manejos/Manejo';
+import Login from './components/view/login/Login';
+import Registro from './components/view/login/Registro';
+import DadosUser from './components/view/login/dadosUser';
 
-import Categoria from './componentes/telas/categoria/Categoria';
-import Produto from './componentes/telas/produto/Produto';
-import Login from './componentes/telas/login/Login';
-
-import MenuPublico from './componentes/MenuPublico';
-import MenuPrivado from './componentes/MenuPrivado';
+import MenuPublico from './components/MenuPublico';
+import MenuPrivado from './components/MenuPrivado';
 
 const router = createBrowserRouter([
     {
@@ -28,12 +30,16 @@ const router = createBrowserRouter([
                 element: <Home />
             },
             {
-                path: "/sobre",
+                path: "sobre",
                 element: <Sobre />
             },
             {
                 path: "login",
                 element: <Login />
+            },
+            {
+                path: "registro",
+                element: <Registro />
             }
         ]
     },
@@ -50,12 +56,20 @@ const router = createBrowserRouter([
                 element: <Sobre />
             },
             {
-                path: "categorias",
-                element: <Categoria />
+                path: "plantas",
+                element: <Planta />
             },
             {
-                path: "produtos",
-                element: <Produto />
+                path: "culturas",
+                element: <Cultura />
+            },
+            {
+                path: "manejos",
+                element: <Manejo />
+            },
+            {
+                path: "meusdados",
+                element: <DadosUser />
             }
         ]
     }

@@ -5,17 +5,21 @@ import Carregando from "../../common/Carregando";
 import Table from "react-bootstrap/Table";
 import { Button } from "react-bootstrap";
 import { formatarDataBR } from "../../common/datas";
+import { getUsuario } from "../../../security/Autenticacao";
 
 function Tabela() {
   const {
     alerta,
     listaObjetos,
+    listaPlantas,
     remover,
     novoObjeto,
     editarObjeto,
     registrarColheita,
     carregando,
   } = useContext(CulturaContext);
+
+  const usuario = getUsuario();
 
   return (
     <div style={{ padding: "20px" }}>
@@ -42,42 +46,56 @@ function Tabela() {
               </tr>
             </thead>
             <tbody>
-              {listaObjetos.map((objeto) => (
-                <tr key={objeto.id_cultura}>
-                  <td align="center">
-                    {/* O botão de Colher aparece apenas se a data de colheita estiver vazia */}
-                    {!objeto.data_colheita && (
-                      <Button
-                        variant="success"
-                        className="me-2"
-                        title="Registrar Colheita"
-                        onClick={() => registrarColheita(objeto)}
-                      >
-                        <i className="bi bi-check2-all"></i> Colher
-                      </Button>
-                    )}
+              {listaObjetos.map((objeto) => {
+                // Recupera o nome da planta pelo objeto ou buscando na lista de plantas
+                const nomePlanta =
+                  objeto.planta_nome ||
+                  listaPlantas?.find(
+                    (p) => String(p.id_planta || p.codigo) === String(objeto.planta_id)
+                  )?.nome_planta ||
+                  `Planta #${objeto.planta_id}`;
 
-                    <Button
-                      variant="info"
-                      className="me-2"
-                      onClick={() => editarObjeto(objeto.id_cultura)}
-                    >
-                      <i className="bi bi-pencil-square"></i>
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => remover(objeto.id_cultura)}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </Button>
-                  </td>
-                  <td>{objeto.id_cultura}</td>
-                  <td>{objeto.planta_nome || objeto.planta_id}</td>
-                  <td>{objeto.hectares}</td>
-                  <td>{formatarDataBR(objeto.data_plantio)}</td>
-                  <td>{formatarDataBR(objeto.data_colheita)}</td>
-                </tr>
-              ))}
+                return (
+                  <tr key={objeto.id_cultura}>
+                    <td align="center">
+                      {/* O botão de Colher aparece apenas se a data de colheita estiver vazia */}
+                      {!objeto.data_colheita && (
+                        <Button
+                          variant="success"
+                          className="me-2"
+                          title="Registrar Colheita"
+                          onClick={() => registrarColheita(objeto)}
+                        >
+                          <i className="bi bi-check2-all"></i> Colher
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="info"
+                        className="me-2"
+                        onClick={() => editarObjeto(objeto.id_cultura)}
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </Button>
+
+                      {/* Botão de remoção visível apenas para administradores */}
+                      {usuario && usuario.modo === "A" && (
+                        <Button
+                          variant="danger"
+                          onClick={() => remover(objeto.id_cultura)}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </Button>
+                      )}
+                    </td>
+                    <td>{objeto.id_cultura}</td>
+                    <td>{nomePlanta}</td>
+                    <td>{objeto.hectares}</td>
+                    <td>{formatarDataBR(objeto.data_plantio)}</td>
+                    <td>{formatarDataBR(objeto.data_colheita)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         )}

@@ -5,10 +5,13 @@ import Carregando from "../../common/Carregando";
 import Table from "react-bootstrap/Table";
 import { Button } from "react-bootstrap";
 import { formatarDataBR } from "../../common/datas";
+import { getUsuario } from "../../../security/Autenticacao";
 
 function Tabela() {
-  const { alerta, listaObjetos, remover, novoObjeto, editarObjeto, carregando } =
+  const { alerta, listaObjetos, listaCulturas, remover, novoObjeto, editarObjeto, carregando } =
     useContext(ManejoContext);
+
+  const usuario = getUsuario();
 
   return (
     <div style={{ padding: "20px" }}>
@@ -45,15 +48,29 @@ function Tabela() {
                     >
                       <i className="bi bi-pencil-square"></i>
                     </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => remover(objeto.id_manejo)}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </Button>
+
+                    {/* Botão de remoção visível apenas para administradores */}
+                    {usuario && usuario.modo === 'A' && (
+                      <Button
+                        variant="danger"
+                        onClick={() => remover(objeto.id_manejo)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </Button>
+                    )}
                   </td>
                   <td>{objeto.id_manejo}</td>
-                  <td>{objeto.cultura_nome || objeto.cultura_id}</td>
+                  <td>
+                    {objeto.cultura_nome ||
+                      (() => {
+                        const c = listaCulturas?.find(
+                          (item) => String(item.id_cultura || item.codigo) === String(objeto.cultura_id)
+                        );
+                        return c
+                          ? `Cultura de ${c.planta_nome || "Planta #" + c.planta_id}${c.hectares ? ` - ${c.hectares} hectares` : ""}`
+                          : `Cultura #${objeto.cultura_id}`;
+                      })()}
+                  </td>
                   <td>{objeto.tipo_manejo}</td>
                   <td>{objeto.descricao_manejo}</td>
                   <td>{formatarDataBR(objeto.data_manejo)}</td>

@@ -1,58 +1,60 @@
 import { jwtDecode } from "jwt-decode";
 
-const NOMEAPP = 'eshoppw';
+const NOMEAPP = 'culturas_agricolas_pw';
 
 export const getToken = () => {
-    const localStorageAutenticacao =
-        localStorage.getItem(NOMEAPP + '/autenticacao');
+    try {
+        const localStorageAutenticacao =
+            localStorage.getItem(NOMEAPP + '/autenticacao');
 
-    const autenticacao = localStorageAutenticacao
-        ? JSON.parse(localStorageAutenticacao)
-        : null;
+        const autenticacao = localStorageAutenticacao
+            ? JSON.parse(localStorageAutenticacao)
+            : null;
 
-    if (autenticacao === null) {
-        return null;
-    }
+        if (!autenticacao || autenticacao.auth === false || !autenticacao.token) {
+            return null;
+        }
 
-    if (autenticacao.auth === false) {
-        return null;
-    } else {
         let decoded = jwtDecode(autenticacao.token);
 
         if (decoded.exp <= Math.floor(new Date() / 1000)) {
             console.log('Token expirado');
             logout();
-            throw new Error("Token expirado");
-        } else {
-            return autenticacao.token;
+            return null;
         }
+
+        return autenticacao.token;
+    } catch (e) {
+        logout();
+        return null;
     }
 };
 
 export const getUsuario = () => {
-    const localStorageAutenticacao =
-        localStorage.getItem(NOMEAPP + '/autenticacao');
+    try {
+        const localStorageAutenticacao =
+            localStorage.getItem(NOMEAPP + '/autenticacao');
 
-    const autenticacao = localStorageAutenticacao
-        ? JSON.parse(localStorageAutenticacao)
-        : null;
+        const autenticacao = localStorageAutenticacao
+            ? JSON.parse(localStorageAutenticacao)
+            : null;
 
-    if (autenticacao === null) {
-        return null;
-    }
+        if (!autenticacao || autenticacao.auth === false || !autenticacao.token) {
+            return null;
+        }
 
-    if (autenticacao.auth === false) {
-        return null;
-    } else {
         let decoded = jwtDecode(autenticacao.token);
 
         if (decoded.exp <= Math.floor(new Date() / 1000)) {
             console.log('Token expirado');
             logout();
-            throw new Error("Token expirado");
-        } else {
-            return decoded.usuario;
+            return null;
         }
+
+        return decoded.usuario;
+    } catch (e) {
+        logout();
+        return null;
     }
 };
 
